@@ -1,0 +1,13 @@
+//
+//  release.xcconfig
+//  VLCTests
+//
+//  Created by yellow on 2/2/21.
+//  Copyright © 2021 Facebook. All rights reserved.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+#include "Pods/Target Support Files/Pods-VLCTests/Pods-VLCTests.release.xcconfig"
+#include "MobileVLCKit.xcconfig"

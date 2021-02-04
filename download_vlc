@@ -1,0 +1,4 @@
+curl https://download.videolan.org/pub/cocoapods/prod/MobileVLCKit-3.3.15-8f0cf4ce-ce04499f.tar.xz | tar -xz && \
+mv  MobileVLCKit-binary/MobileVLCKit.framework ios/ && \
+rm -rf MobileVLCKit-binary/
+

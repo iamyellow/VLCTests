@@ -1,0 +1,14 @@
+//
+//  MobileVLCKit.xcconfig
+//  VLCTests
+//
+//  Created by yellow on 2/2/21.
+//  Copyright © 2021 Facebook. All rights reserved.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+OTHER_LDFLAGS = $(inherited) -l"c++" -l"xml2" -l"z" -l"bz2" -l"iconv" -framework "QuartzCore" -framework "CoreText" -framework "AVFoundation" -framework "Security" -framework "CFNetwork" -framework "AudioToolbox" -framework "OpenGLES" -framework "CoreGraphics" -framework "VideoToolbox" -framework "CoreMedia";
+CLANG_CXX_LANGUAGE_STANDARD=c++11;
+CLANG_CXX_LIBRARY=libc++;
