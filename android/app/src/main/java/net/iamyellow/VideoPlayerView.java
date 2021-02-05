@@ -41,10 +41,12 @@ public class VideoPlayerView extends FrameLayout implements
     textureView.setSurfaceTextureListener(this);
 
     mLibVLC = new LibVLC(context);
-    mPlayer = new MediaPlayer(mLibVLC);
 
+    mPlayer = new MediaPlayer(mLibVLC);
     mPlayer.setScale(0);
     mPlayer.setVideoScale(MediaPlayer.ScaleType.SURFACE_BEST_FIT);
+
+    // events
 
     mPlayer.setEventListener(this);
     getReactContext().addLifecycleEventListener(this);
@@ -100,7 +102,7 @@ public class VideoPlayerView extends FrameLayout implements
     this.playInBackground = playInBackground;
   }
 
-  private void sendJsEvent(String kind) {
+  private void emitJsEvent(String kind) {
     WritableMap payload = Arguments.createMap();
     payload.putInt("id", this.listenerId);
     payload.putString("kind", kind);
@@ -110,7 +112,7 @@ public class VideoPlayerView extends FrameLayout implements
     eventEmitter.emit(VideoPlayerModule.IAY_VIDEO_PLAYER_MODULE_JS_EVENT_NAME, payload);
   }
 
-  // playing
+  // play state helpers
 
   private void play() {
     if (!mPlayer.getVLCVout().areViewsAttached()) {
@@ -228,7 +230,7 @@ public class VideoPlayerView extends FrameLayout implements
     }
 
     if (kind != null) {
-      this.sendJsEvent(kind);
+      this.emitJsEvent(kind);
     }
   }
 }
