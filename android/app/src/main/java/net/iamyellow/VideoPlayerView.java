@@ -75,7 +75,9 @@ public class VideoPlayerView extends FrameLayout implements
     mPlayer.setMedia(media);
     media.release();
 
-    play();
+    if (!this.paused) {
+      play();
+    }
   }
 
   public void setPaused(boolean paused) {

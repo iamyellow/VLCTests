@@ -25,7 +25,6 @@
 @property (nonatomic, assign) NSInteger volume;
 @property (nonatomic, strong) NSString* videoAspectRatio;
 @property (nonatomic, assign) BOOL playInBackground;
-@property (nonatomic, assign) BOOL wasPlayingBeforeResignActive;
 
 @end
 
@@ -39,6 +38,85 @@
   }
   return self;
 }
+
+#pragma mark - js land
+
+-(void)setListenerId:(NSInteger)listenerId
+{
+  _listenerId = listenerId;
+}
+
+-(void)setSourceUri:(NSString *)sourceUri
+{
+  [self stop];
+  
+  _sourceUri = sourceUri;
+  _mediaPlayer.media = [VLCMedia mediaWithURL:[NSURL URLWithString:_sourceUri]];
+  
+  if (!_paused) {
+    [self play];
+  }
+}
+
+-(void)setPaused:(BOOL)paused
+{
+  _paused = paused;
+  
+  if (!paused) {
+    [self play];
+  }
+  else {
+    [self pause];
+  }
+}
+
+-(void)setMuted:(BOOL)muted
+{
+  _muted = muted;
+  _mediaPlayer.audio.muted = _muted;
+}
+
+-(void)setVolume:(NSInteger)volume
+{
+  _volume = volume;
+  _mediaPlayer.audio.volume = @(_volume).intValue;
+}
+
+-(void)setVideoAspectRatio:(NSString *)videoAspectRatio
+{
+  _videoAspectRatio = videoAspectRatio;
+  _mediaPlayer.videoAspectRatio = strdup(_videoAspectRatio.UTF8String);
+}
+
+-(void)setPlayInBackground:(BOOL)playInBackground
+{
+  _playInBackground = playInBackground;
+}
+
+#pragma mark - play state helpers
+
+-(void)play
+{
+  if (_mediaPlayer.media && !_mediaPlayer.isPlaying) {
+    [_mediaPlayer play];
+  }
+}
+
+-(void)pause
+{
+  if (_mediaPlayer.media && _mediaPlayer.isPlaying) {
+    [_mediaPlayer pause];
+  }
+}
+
+-(void)stop
+{
+  if (_mediaPlayer.media && _mediaPlayer.isPlaying) {
+    [_mediaPlayer stop];
+  }
+}
+
+#pragma mark - view lifecycle
 
 -(void)didMoveToWindow
 {
@@ -55,68 +133,35 @@
                                              selector:@selector(applicationWillEnterForeground:)
                                                  name:UIApplicationWillEnterForegroundNotification
                                                object:nil];
-  } else {
-    if (_mediaPlayer.isPlaying) {
-      [_mediaPlayer stop];
+    
+    if (!_paused) {
+      [self play];
     }
+  } else {
+    [self stop];
+    
     _mediaPlayer.drawable = nil; // IMPORTANT: player will retain (strong) the view otherwise
     _mediaPlayer.delegate = nil;
-    _wasPlayingBeforeResignActive = NO;
+
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
   }
 
   [super didMoveToWindow];
 }
 
--(void)didSetProps:(NSArray<NSString*>*)changedProps
+#pragma mark - app lifecycle
+
+-(void)applicationWillEnterForeground:(NSNotification*)notif
 {
-  BOOL sourceUriDidChange = [changedProps indexOfObject:@"sourceUri"] != NSNotFound;
-  if (sourceUriDidChange) {
-    if (_mediaPlayer.isPlaying) {
-      [_mediaPlayer stop];
-    }
-    _mediaPlayer.media = [VLCMedia mediaWithURL:[NSURL URLWithString:_sourceUri]];
-  }
-  
-  if ([changedProps indexOfObject:@"paused"] != NSNotFound || sourceUriDidChange) {
-    if (_paused) {
-      [_mediaPlayer pause];
-    }
-    else {
-      [_mediaPlayer play];
-    }
-  }
-  
-  if ([changedProps indexOfObject:@"muted"] != NSNotFound) {
-    _mediaPlayer.audio.muted = _muted;
-  }
-  
-  if ([changedProps indexOfObject:@"volume"] != NSNotFound) {
-    _mediaPlayer.audio.volume = @(_volume).intValue;
-  }
-  
-  if ([changedProps indexOfObject:@"videoAspectRatio"] != NSNotFound) {
-    _mediaPlayer.videoAspectRatio = strdup(_videoAspectRatio.UTF8String);
+  if (!_paused) {
+    [self play];
   }
 }
-
-#pragma mark - App lifecycle
 
 -(void)applicationWillResignActive:(NSNotification*)notif
 {
   if (!_playInBackground) {
-    _wasPlayingBeforeResignActive = _mediaPlayer.isPlaying && !_paused;
-    if (_mediaPlayer.isPlaying) {
-      [_mediaPlayer stop];
-    }
-  }
-}
-
--(void)applicationWillEnterForeground:(NSNotification*)notif
-{
-  if (!_playInBackground) {
-    if (_wasPlayingBeforeResignActive) {
-      [_mediaPlayer play];
-    }
+    [self pause];
   }
 }
 
