@@ -4,7 +4,6 @@ declare type VideoPlayerViewProps = {
   style?: StyleProp<ViewStyle>
   sourceUri: string
   paused: boolean
-  paused: boolean
   muted?: boolean
   volume?: number
   videoAspectRatio?: string

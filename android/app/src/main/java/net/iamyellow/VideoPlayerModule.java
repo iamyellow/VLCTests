@@ -8,7 +8,9 @@ import java.util.Map;
 
 public class VideoPlayerModule extends ReactContextBaseJavaModule {
   private static ReactApplicationContext reactContext;
-  private static final String EVENT_NAME = "iay::VLCPlayer::js::onChange";
+
+  public static final String IAY_VIDEO_PLAYER_MODULE_JS_EVENT_NAME =
+      "iay::VLCPlayer::js::onChange";
 
   VideoPlayerModule(ReactApplicationContext context) {
     super(context);
@@ -23,7 +25,7 @@ public class VideoPlayerModule extends ReactContextBaseJavaModule {
   @Override
   public Map<String, Object> getConstants() {
     final Map<String, Object> constants = new HashMap<>();
-    constants.put("EVENT_NAME", EVENT_NAME);
+    constants.put("EVENT_NAME", IAY_VIDEO_PLAYER_MODULE_JS_EVENT_NAME);
     return constants;
   }
 }

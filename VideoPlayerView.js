@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import {
+  DeviceEventEmitter,
   NativeEventEmitter,
   NativeModules,
   Platform,
@@ -15,28 +16,28 @@ let lastListenerId = 0
 export const VideoPlayerView = props => {
   const [myListenerId] = useState(lastListenerId)
   const propsRef = useRef(props)
+  const mountedRef = useRef(false)
 
   useEffect(() => {
     propsRef.current = props
   }, [props])
 
   useEffect(() => {
+    mountedRef.current = true
     lastListenerId += 1
 
     const eventEmitter = Platform.select({
       ios: new NativeEventEmitter(VideoPlayerModule),
-      android: {
-        addListener: () => {
-          return {
-            remove: () => {}
-          }
-        }
-      }
+      android: DeviceEventEmitter
     })
 
     const subscription = eventEmitter.addListener(
       VideoPlayerModule.EVENT_NAME,
       event => {
+        if (!mountedRef.current) {
+          return
+        }
+
         const { id, kind } = event
         if (id !== myListenerId) {
           return
@@ -67,6 +68,7 @@ export const VideoPlayerView = props => {
     )
 
     return () => {
+      mountedRef.current = false
       subscription.remove()
     }
   }, [])
