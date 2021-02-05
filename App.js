@@ -15,11 +15,12 @@ const App = () => {
     'http://streams.videolan.org/streams/mp4/Mr_MrsSmith-h264_aac.mp4'
   )
 
-  /*useEffect(() => {
+  useEffect(() => {
     setTimeout(() => {
+      console.log('*** go')
       setSourceUri('rtsp://admin:ESVLSW@alfredvpn.mooo.com:5543')
-    }, 10000)
-  }, [])*/
+    }, 10 * 1000)
+  }, [])
 
   return (
     <VideoPlayerView

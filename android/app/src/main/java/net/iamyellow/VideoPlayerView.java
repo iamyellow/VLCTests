@@ -68,10 +68,14 @@ public class VideoPlayerView extends FrameLayout implements
   }
 
   public void setSourceUri(String sourceUri) {
+    stop();
+
     Media media = new Media(mLibVLC, Uri.parse(sourceUri));
     media.setHWDecoderEnabled(true, false);
     mPlayer.setMedia(media);
     media.release();
+
+    play();
   }
 
   public void setPaused(boolean paused) {
