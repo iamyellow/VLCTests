@@ -46,10 +46,16 @@ public class VideoPlayerView extends FrameLayout implements
     mPlayer.setScale(0);
     mPlayer.setVideoScale(MediaPlayer.ScaleType.SURFACE_BEST_FIT);
 
-    // events
-
     mPlayer.setEventListener(this);
     getReactContext().addLifecycleEventListener(this);
+  }
+
+  public void cleanUp() {
+    mPlayer.setEventListener(null);
+    mPlayer.release();
+    mLibVLC.release();
+
+    getReactContext().removeLifecycleEventListener(this);
   }
 
   private ThemedReactContext getReactContext() {
@@ -91,13 +97,13 @@ public class VideoPlayerView extends FrameLayout implements
     }
   }
 
-  public void setMuted(boolean muted) {
-    mPlayer.setVolume(muted ? - 1 : this.volume);
-  }
-
   public void setVolume(int volume) {
     this.volume = volume;
     mPlayer.setVolume(volume);
+  }
+
+  public void setMuted(boolean muted) {
+    mPlayer.setVolume(muted ? - 1 : this.volume);
   }
 
   public void setVideoAspectRatio(String videoAspectRatio) {
@@ -167,15 +173,7 @@ public class VideoPlayerView extends FrameLayout implements
   }
 
   @Override
-  public void onHostDestroy() {
-    stop();
-
-    mPlayer.setEventListener(null);
-    mPlayer.release();
-    mLibVLC.release();
-
-    getReactContext().removeLifecycleEventListener(this);
-  }
+  public void onHostDestroy() {}
 
   // TextureView.SurfaceTextureListener
 
@@ -204,7 +202,7 @@ public class VideoPlayerView extends FrameLayout implements
     IVLCVout ivlcVout = mPlayer.getVLCVout();
     ivlcVout.detachViews();
 
-    return false;
+    return true;
   }
 
   @Override

@@ -4,6 +4,8 @@ import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;
 
+import javax.annotation.Nonnull;
+
 public class VideoPlayerViewManager  extends SimpleViewManager<VideoPlayerView> {
 
   @Override
@@ -14,6 +16,12 @@ public class VideoPlayerViewManager  extends SimpleViewManager<VideoPlayerView> 
   @Override
   public VideoPlayerView createViewInstance(ThemedReactContext context) {
     return new VideoPlayerView(context);
+  }
+
+  @Override
+  public void onDropViewInstance(@Nonnull VideoPlayerView view) {
+    super.onDropViewInstance(view);
+    view.cleanUp();
   }
 
   @ReactProp(name = "listenerId")
