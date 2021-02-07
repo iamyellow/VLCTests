@@ -45,18 +45,9 @@ public class VideoPlayerView extends FrameLayout implements
     mPlayer = new MediaPlayer(mLibVLC);
     mPlayer.setScale(0);
     mPlayer.setVideoScale(MediaPlayer.ScaleType.SURFACE_BEST_FIT);
-
-    mPlayer.setEventListener(this);
-    getReactContext().addLifecycleEventListener(this);
   }
 
-  public void cleanUp() {
-    mPlayer.setEventListener(null);
-    mPlayer.release();
-    mLibVLC.release();
-
-    getReactContext().removeLifecycleEventListener(this);
-  }
+  public void onReactUnmount() { }
 
   private ThemedReactContext getReactContext() {
     return (ThemedReactContext) getContext();
@@ -184,6 +175,9 @@ public class VideoPlayerView extends FrameLayout implements
     ivlcVout.setWindowSize(width, height);
     ivlcVout.attachViews();
 
+    getReactContext().addLifecycleEventListener(this);
+    mPlayer.setEventListener(this);
+
     if (!this.paused) {
       play();
     }
@@ -201,6 +195,12 @@ public class VideoPlayerView extends FrameLayout implements
 
     IVLCVout ivlcVout = mPlayer.getVLCVout();
     ivlcVout.detachViews();
+
+    mPlayer.release();
+    mLibVLC.release();
+
+    mPlayer.setEventListener(null);
+    getReactContext().removeLifecycleEventListener(this);
 
     return true;
   }

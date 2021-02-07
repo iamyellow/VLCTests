@@ -21,7 +21,7 @@ public class VideoPlayerViewManager  extends SimpleViewManager<VideoPlayerView> 
   @Override
   public void onDropViewInstance(@Nonnull VideoPlayerView view) {
     super.onDropViewInstance(view);
-    view.cleanUp();
+    view.onReactUnmount();
   }
 
   @ReactProp(name = "listenerId")
