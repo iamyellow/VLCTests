@@ -173,6 +173,8 @@
 
 -(void)mediaPlayerStateChanged:(NSNotification*)notification
 {
+  // NSLog(@"*** state = %@", VLCMediaPlayerStateToString(_mediaPlayer.state));
+  
   NSString* kind;
   switch (_mediaPlayer.state) {
     case VLCMediaPlayerStateOpening:
@@ -186,7 +188,13 @@
       kind = @"paused";
       break;
     case VLCMediaPlayerStateStopped:
-      kind = @"stopped";
+      // https://github.com/videolan/vlc-ios/blob/64f6a8cc91ac200fea9fb154b5c8e00faa6e6e98/Sources/VLCPlaybackService.m#L324
+      if (_mediaPlayer.media.numberOfDecodedAudioBlocks == 0 && _mediaPlayer.media.numberOfDecodedVideoBlocks == 0) {
+        kind = @"error";
+      }
+      else {
+        kind = @"stopped";
+      }
       break;
     case VLCMediaPlayerStateEnded:
       kind = @"ended";
