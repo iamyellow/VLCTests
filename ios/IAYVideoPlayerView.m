@@ -36,9 +36,30 @@
 {
   self = [super init];
   if (self) {
-    _mediaPlayer = [[VLCMediaPlayer alloc] init];
+    self.mediaPlayer = [[VLCMediaPlayer alloc] init];
+    self.mediaPlayer.delegate = self;
+    self.mediaPlayer.drawable = self;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                                selector:@selector(applicationWillResignActive:)
+                                                    name:UIApplicationWillResignActiveNotification
+                                                  object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationWillEnterForeground:)
+                                                 name:UIApplicationWillEnterForegroundNotification
+                                               object:nil];
   }
   return self;
+}
+
+-(void)cleanUp
+{
+  [self stop];
+  
+  _mediaPlayer.drawable = nil; // IMPORTANT: player will retain (strong) the view otherwise
+  _mediaPlayer.delegate = nil;
+
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 #pragma mark - js land
@@ -50,10 +71,8 @@
 
 -(void)setSourceUri:(NSString *)sourceUri
 {
-  [self stop];
-  
   _sourceUri = sourceUri;
-  _mediaPlayer.media = [VLCMedia mediaWithURL:[NSURL URLWithString:_sourceUri]];
+  _mediaPlayer.media = [VLCMedia mediaWithURL:[NSURL URLWithString:sourceUri]];
   
   if (!_paused) {
     [self play];
@@ -124,28 +143,11 @@
 {
   BOOL isVisible = self.superview && self.window;
   if (isVisible) {
-    _mediaPlayer.delegate = self;
-    _mediaPlayer.drawable = self;
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                                selector:@selector(applicationWillResignActive:)
-                                                    name:UIApplicationWillResignActiveNotification
-                                                  object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(applicationWillEnterForeground:)
-                                                 name:UIApplicationWillEnterForegroundNotification
-                                               object:nil];
-    
     if (!_paused) {
       [self play];
     }
   } else {
-    [self stop];
-    
-    _mediaPlayer.drawable = nil; // IMPORTANT: player will retain (strong) the view otherwise
-    _mediaPlayer.delegate = nil;
-
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self cleanUp];
   }
 
   [super didMoveToWindow];
@@ -171,8 +173,6 @@
 
 -(void)mediaPlayerStateChanged:(NSNotification*)notification
 {
-  // NSLog(@"*** _mediaPlayer.state = ", VLCMediaPlayerStateToString(_mediaPlayer.state));
-        
   NSString* kind;
   switch (_mediaPlayer.state) {
     case VLCMediaPlayerStateOpening:
@@ -180,6 +180,7 @@
       break;
     case VLCMediaPlayerStatePlaying:
       kind = @"playing";
+      _needsFireViewingJsEvent = YES;
       break;
     case VLCMediaPlayerStatePaused:
       kind = @"paused";
@@ -205,7 +206,7 @@
 
 -(void)mediaPlayerTimeChanged:(NSNotification*)aNotification
 {
-  if (_mediaPlayer.time.intValue > 0 && _needsFireViewingJsEvent) {
+  if (_needsFireViewingJsEvent) {
     _needsFireViewingJsEvent = NO;
     
     NSDictionary* viewingEvent = @{@"id": @(self.listenerId), @"kind": @"viewing"};

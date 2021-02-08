@@ -46,9 +46,20 @@ public class VideoPlayerView extends FrameLayout implements
     mPlayer = new MediaPlayer(mLibVLC);
     mPlayer.setScale(0);
     mPlayer.setVideoScale(MediaPlayer.ScaleType.SURFACE_BEST_FIT);
+
+    getReactContext().addLifecycleEventListener(this);
+    mPlayer.setEventListener(this);
   }
 
-  public void onReactUnmount() { }
+  public void cleanUp() {
+    stop();
+
+    mPlayer.release();
+    mLibVLC.release();
+
+    mPlayer.setEventListener(null);
+    getReactContext().removeLifecycleEventListener(this);
+  }
 
   private ThemedReactContext getReactContext() {
     return (ThemedReactContext) getContext();
@@ -176,9 +187,6 @@ public class VideoPlayerView extends FrameLayout implements
     ivlcVout.setWindowSize(width, height);
     ivlcVout.attachViews();
 
-    getReactContext().addLifecycleEventListener(this);
-    mPlayer.setEventListener(this);
-
     if (!this.paused) {
       play();
     }
@@ -192,16 +200,8 @@ public class VideoPlayerView extends FrameLayout implements
 
   @Override
   public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-    stop();
-
     IVLCVout ivlcVout = mPlayer.getVLCVout();
     ivlcVout.detachViews();
-
-    mPlayer.release();
-    mLibVLC.release();
-
-    mPlayer.setEventListener(null);
-    getReactContext().removeLifecycleEventListener(this);
 
     return true;
   }
@@ -219,8 +219,8 @@ public class VideoPlayerView extends FrameLayout implements
         mViewableState = 0;
         break;
       case MediaPlayer.Event.Playing:
-        mViewableState += 1;
         kind = "playing";
+        mViewableState += 1;
         break;
       case MediaPlayer.Event.Paused:
         kind = "paused";
