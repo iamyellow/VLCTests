@@ -26,6 +26,8 @@
 @property (nonatomic, strong) NSString* videoAspectRatio;
 @property (nonatomic, assign) BOOL playInBackground;
 
+@property (nonatomic, assign) BOOL needsFireViewingJsEvent;
+
 @end
 
 @implementation IAYVideoPlayerView
@@ -169,8 +171,13 @@
 
 -(void)mediaPlayerStateChanged:(NSNotification*)notification
 {
+  // NSLog(@"*** _mediaPlayer.state = ", VLCMediaPlayerStateToString(_mediaPlayer.state));
+        
   NSString* kind;
   switch (_mediaPlayer.state) {
+    case VLCMediaPlayerStateOpening:
+      _needsFireViewingJsEvent = YES;
+      break;
     case VLCMediaPlayerStatePlaying:
       kind = @"playing";
       break;
@@ -190,12 +197,20 @@
       break;
   }
   
-  if (!kind) {
-    return;
+  if (kind) {
+    NSDictionary* event = @{@"id": @(self.listenerId), @"kind": kind};
+    [IAYVideoPlayerModule emitPlayerStateEvent:event];
   }
-  
-  NSDictionary* event = @{@"id": @(self.listenerId), @"kind": kind};
-  [IAYVideoPlayerModule emitPlayerStateEvent:event];
+}
+
+-(void)mediaPlayerTimeChanged:(NSNotification*)aNotification
+{
+  if (_mediaPlayer.time.intValue > 0 && _needsFireViewingJsEvent) {
+    _needsFireViewingJsEvent = NO;
+    
+    NSDictionary* viewingEvent = @{@"id": @(self.listenerId), @"kind": @"viewing"};
+    [IAYVideoPlayerModule emitPlayerStateEvent:viewingEvent];
+  }
 }
 
 @end

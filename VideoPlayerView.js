@@ -43,11 +43,7 @@ export const VideoPlayerView = props => {
           return
         }
 
-        if (kind === 'opening') {
-          if (propsRef.current.onOpening) {
-            propsRef.current.onOpening()
-          }
-        } else if (kind === 'playing') {
+        if (kind === 'playing') {
           if (propsRef.current.onPlaying) {
             propsRef.current.onPlaying()
           }

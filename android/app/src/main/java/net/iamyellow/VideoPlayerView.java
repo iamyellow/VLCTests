@@ -217,7 +217,6 @@ public class VideoPlayerView extends FrameLayout implements
     switch (event.type) {
       case MediaPlayer.Event.Opening:
         mViewableState = 0;
-        kind = "opening";
         break;
       case MediaPlayer.Event.Playing:
         mViewableState += 1;

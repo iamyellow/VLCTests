@@ -35,9 +35,6 @@ const App = () => {
       sourceUri={sourceUri}
       paused={false}
       playInBackground={false}
-      onOpening={() => {
-        console.log('*** opening')
-      }}
       onPlaying={() => {
         console.log('*** playing')
       }}
