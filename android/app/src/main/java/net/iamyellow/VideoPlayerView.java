@@ -30,6 +30,7 @@ public class VideoPlayerView extends FrameLayout implements
 
   private LibVLC mLibVLC = null;
   private MediaPlayer mPlayer = null;
+  private int mViewableState = 0;
 
   public VideoPlayerView(@NonNull Context context) {
     super(context);
@@ -214,7 +215,12 @@ public class VideoPlayerView extends FrameLayout implements
   public void onEvent(MediaPlayer.Event event) {
     String kind = null;
     switch (event.type) {
+      case MediaPlayer.Event.Opening:
+        mViewableState = 0;
+        kind = "opening";
+        break;
       case MediaPlayer.Event.Playing:
+        mViewableState += 1;
         kind = "playing";
         break;
       case MediaPlayer.Event.Paused:
@@ -229,12 +235,21 @@ public class VideoPlayerView extends FrameLayout implements
       case MediaPlayer.Event.EncounteredError:
         kind = "error";
         break;
+      case MediaPlayer.Event.Vout:
+        mViewableState += 1;
+        break;
       default:
+        // kind = "other " + Integer.toHexString(event.type);
         break;
     }
 
     if (kind != null) {
       this.emitJsEvent(kind);
+    }
+
+    if (mViewableState == 2) {
+      mViewableState += 1;
+      this.emitJsEvent("viewing");
     }
   }
 }

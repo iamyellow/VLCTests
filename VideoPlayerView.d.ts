@@ -8,7 +8,9 @@ declare type VideoPlayerViewProps = {
   volume?: number
   videoAspectRatio?: string
   playInBackground?: boolean
+  onOpening?: () => void
   onPlaying?: () => void
+  onViewing?: () => void
   onPaused?: () => void
   onEnded?: () => void
   onStopped?: () => void

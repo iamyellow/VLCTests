@@ -12,14 +12,21 @@ import { VideoPlayerView } from './VideoPlayerView'
 
 const App = () => {
   const [sourceUri, setSourceUri] = useState(
-    'http://streams.videolan.org/streams/mp4/Mr_MrsSmith-h264_aac.mp4'
+    // 'http://streams.videolan.org/streams/mp4/Mr_MrsSmith-h264_aac.mp4'
+    'rtsp://admin:ESVLSW@alfredvpn.mooo.com:5543'
   )
 
   useEffect(() => {
-    setTimeout(() => {
-      console.log('*** go')
-      setSourceUri('rtsp://admin:ESVLSW@alfredvpn.mooo.com:5543')
-    }, 10 * 1000)
+    const timer = setTimeout(() => {
+      console.log('*** PERKINS go')
+      setSourceUri(
+        'http://streams.videolan.org/streams/mp4/Mr_MrsSmith-h264_aac.mp4'
+      )
+    }, 25 * 1000)
+
+    return () => {
+      clearTimeout(timer)
+    }
   }, [])
 
   return (
@@ -28,11 +35,17 @@ const App = () => {
       sourceUri={sourceUri}
       paused={false}
       playInBackground={false}
+      onOpening={() => {
+        console.log('*** opening')
+      }}
       onPlaying={() => {
         console.log('*** playing')
       }}
+      onViewing={() => {
+        console.log('*** viewing')
+      }}
       onPaused={() => {
-        console.log('*** pause')
+        // console.log('*** pause')
       }}
     />
   )
